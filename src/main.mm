@@ -40,7 +40,7 @@ static bool g_pause_rotation = false;
 static bool g_show_demo = false;
 static float g_rotation_speed = 1.0f;
 static float g_clear_color[3] = { 0.10f, 0.12f, 0.18f };
-static const char* g_imgui_font_path = "LucidaG.ttf";
+static const char* g_imgui_font_path = "Assets/LucidaG.ttf";
 
 static mat4 mat4_identity(void) {
     mat4 m = {};
