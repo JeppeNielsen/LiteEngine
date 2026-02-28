@@ -7,31 +7,30 @@
 #define SOKOL_GLCORE
 
 #include "sokol_app.h"
-#include "sokol_gfx.h"
+#include "Rendering/SokolGfx.hpp"
 #include "sokol_glue.h"
 #include "sokol_log.h"
 
 #include "imgui.h"
 #include "sokol_imgui.h"
 
+#include <entt/entt.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <stddef.h>
 #include <stdint.h>
 
-typedef struct {
-    float x, y, z;
-    float r, g, b, a;
-} vertex_t;
-
-typedef struct {
-    glm::mat4 mvp;
-} vs_params_t;
+#include "Rendering/Camera.hpp"
+#include "Rendering/Mesh.hpp"
+#include "Rendering/Renderable.hpp"
+#include "Rendering/RenderSystem.hpp"
+#include "Rendering/Transform.hpp"
 
 static sg_environment g_env;
-static sg_pipeline g_pip;
-static sg_bindings g_bind;
-static sg_pass_action pass_action;
+static entt::registry g_registry;
+static RenderSystem g_render_system;
+static entt::entity g_camera_entity = entt::null;
+static entt::entity g_cube_entity = entt::null;
 static double g_time_sec = 0.0;
 static bool g_pause_rotation = false;
 static bool g_show_demo = false;
@@ -68,116 +67,18 @@ static void init(void) {
         io.FontGlobalScale = 1.0f / dpi_scale;
     }
 
-    const vertex_t vertices[] = {
-        {  0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f },
-        {  0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f },
-        {  0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 1.0f },
-        {  0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 1.0f },
+    g_render_system.init(g_env);
 
-        { -0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f },
-        { -0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f },
-        { -0.5f,  0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f },
-        { -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f },
+    g_camera_entity = g_registry.create();
+    Transform camera_transform{};
+    camera_transform.position = glm::vec3(0.0f, 0.0f, 2.5f);
+    g_registry.emplace<Transform>(g_camera_entity, camera_transform);
+    g_registry.emplace<Camera>(g_camera_entity);
 
-        { -0.5f,  0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f },
-        { -0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f },
-        {  0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f },
-        {  0.5f,  0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f },
-
-        { -0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 1.0f },
-        { -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 1.0f },
-        {  0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 1.0f },
-        {  0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 1.0f },
-
-        { -0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 1.0f, 1.0f },
-        {  0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 1.0f, 1.0f },
-        {  0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 1.0f, 1.0f },
-        { -0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 1.0f, 1.0f },
-
-        {  0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f },
-        { -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f },
-        { -0.5f,  0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f },
-        {  0.5f,  0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f },
-    };
-
-    const uint16_t indices[] = {
-        0, 1, 2, 0, 2, 3,
-        4, 5, 6, 4, 6, 7,
-        8, 9, 10, 8, 10, 11,
-        12, 13, 14, 12, 14, 15,
-        16, 17, 18, 16, 18, 19,
-        20, 21, 22, 20, 22, 23
-    };
-
-    sg_buffer_desc vbuf_desc = {};
-    vbuf_desc.data = SG_RANGE(vertices);
-    vbuf_desc.usage.vertex_buffer = true;
-    vbuf_desc.usage.immutable = true;
-    vbuf_desc.label = "cube-vertices";
-    g_bind.vertex_buffers[0] = sg_make_buffer(vbuf_desc);
-
-    sg_buffer_desc ibuf_desc = {};
-    ibuf_desc.data = SG_RANGE(indices);
-    ibuf_desc.usage.index_buffer = true;
-    ibuf_desc.usage.immutable = true;
-    ibuf_desc.label = "cube-indices";
-    g_bind.index_buffer = sg_make_buffer(ibuf_desc);
-
-    sg_shader_desc shd_desc = {};
-    shd_desc.attrs[0].glsl_name = "position";
-    shd_desc.attrs[1].glsl_name = "color0";
-    shd_desc.vertex_func.source =
-        "#version 330\n"
-        "layout(location=0) in vec3 position;\n"
-        "layout(location=1) in vec4 color0;\n"
-        "uniform mat4 mvp;\n"
-        "out vec4 color;\n"
-        "void main() {\n"
-        "    gl_Position = mvp * vec4(position, 1.0);\n"
-        "    color = color0;\n"
-        "}\n";
-    shd_desc.fragment_func.source =
-        "#version 330\n"
-        "in vec4 color;\n"
-        "out vec4 frag_color;\n"
-        "void main() {\n"
-        "    frag_color = color;\n"
-        "}\n";
-
-    sg_shader_uniform_block* ub = &shd_desc.uniform_blocks[0];
-    ub->stage = SG_SHADERSTAGE_VERTEX;
-    ub->size = sizeof(vs_params_t);
-    ub->layout = SG_UNIFORMLAYOUT_NATIVE;
-    ub->glsl_uniforms[0].glsl_name = "mvp";
-    ub->glsl_uniforms[0].type = SG_UNIFORMTYPE_MAT4;
-    ub->glsl_uniforms[0].array_count = 1;
-
-    sg_shader shd = sg_make_shader(shd_desc);
-
-    sg_pipeline_desc pip_desc = {};
-    pip_desc.shader = shd;
-    pip_desc.layout.buffers[0].stride = (int)sizeof(vertex_t);
-    pip_desc.layout.attrs[0].format = SG_VERTEXFORMAT_FLOAT3;
-    pip_desc.layout.attrs[0].offset = (int)offsetof(vertex_t, x);
-    pip_desc.layout.attrs[1].format = SG_VERTEXFORMAT_FLOAT4;
-    pip_desc.layout.attrs[1].offset = (int)offsetof(vertex_t, r);
-    pip_desc.index_type = SG_INDEXTYPE_UINT16;
-    pip_desc.cull_mode = SG_CULLMODE_BACK;
-    pip_desc.face_winding = SG_FACEWINDING_CCW;
-    pip_desc.depth.compare = SG_COMPAREFUNC_LESS_EQUAL;
-    pip_desc.depth.write_enabled = true;
-    pip_desc.depth.pixel_format = g_env.defaults.depth_format;
-    pip_desc.color_count = 1;
-    pip_desc.colors[0].pixel_format = g_env.defaults.color_format;
-    pip_desc.sample_count = g_env.defaults.sample_count;
-    g_pip = sg_make_pipeline(&pip_desc);
-
-    pass_action = {};
-    pass_action.colors[0].load_action = SG_LOADACTION_CLEAR;
-    pass_action.colors[0].store_action = SG_STOREACTION_STORE;
-    pass_action.colors[0].clear_value = { g_clear_color[0], g_clear_color[1], g_clear_color[2], 1.0f };
-    pass_action.depth.load_action = SG_LOADACTION_CLEAR;
-    pass_action.depth.clear_value = 1.0f;
+    g_cube_entity = g_registry.create();
+    g_registry.emplace<Transform>(g_cube_entity);
+    g_registry.emplace<Renderable>(g_cube_entity);
+    g_registry.emplace<Mesh>(g_cube_entity, CreateCubeMesh());
 }
 
 static void frame(void) {
@@ -206,31 +107,24 @@ static void frame(void) {
         ImGui::ShowDemoWindow(&g_show_demo);
     }
 
-    const float aspect = (float)sapp_width() / (float)sapp_height();
-    const glm::mat4 proj = glm::perspective(glm::radians(60.0f), aspect, 0.01f, 100.0f);
-    const glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -2.5f));
-    const glm::mat4 rot_x = glm::rotate(glm::mat4(1.0f), (float)g_time_sec * 0.7f, glm::vec3(1.0f, 0.0f, 0.0f));
-    const glm::mat4 rot_y = glm::rotate(glm::mat4(1.0f), (float)g_time_sec * 1.1f, glm::vec3(0.0f, 1.0f, 0.0f));
-    const glm::mat4 model = rot_y * rot_x;
-    const glm::mat4 mvp = proj * view * model;
-    const vs_params_t vs_params = { mvp };
+    if (g_registry.valid(g_cube_entity)) {
+        Transform& cube_transform = g_registry.get<Transform>(g_cube_entity);
+        cube_transform.rotation = glm::vec3(
+            (float)g_time_sec * 0.7f,
+            (float)g_time_sec * 1.1f,
+            0.0f);
+    }
 
-    sg_pass pass = {};
-    pass.action = pass_action;
-    pass.action.colors[0].clear_value = { g_clear_color[0], g_clear_color[1], g_clear_color[2], 1.0f };
-    pass.swapchain = sglue_swapchain();
-    sg_begin_pass(&pass);
-    sg_apply_pipeline(g_pip);
-    sg_apply_bindings(&g_bind);
-    sg_apply_uniforms(0, SG_RANGE(vs_params));
-    sg_draw(0, 36, 1);
+    const float aspect = (float)sapp_width() / (float)sapp_height();
+    g_render_system.begin_frame(sglue_swapchain(), g_clear_color);
+    g_render_system.render(g_registry, aspect);
     simgui_render();
-    sg_end_pass();
-    sg_commit();
+    g_render_system.end_frame();
 }
 
 static void cleanup(void) {
     simgui_shutdown();
+    g_render_system.shutdown();
     sg_shutdown();
 }
 

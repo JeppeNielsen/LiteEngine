@@ -11,7 +11,7 @@ workspace "LiteEngine"
 project "LiteEngine"
     kind "WindowedApp"
     language "C++"
-    cppdialect "C++17"
+    cppdialect "C++20"
     warnings "Extra"
     files {
         path.join(root, "src/**.mm"),
@@ -24,6 +24,7 @@ project "LiteEngine"
         path.join(root, "external/sokol/util"),
         path.join(root, "external/imgui"),
         path.join(root, "external/glm"),
+        path.join(root, "external/entt/src"),
     }
     targetdir (path.join(build_dir, "bin/%{cfg.buildcfg}"))
     objdir (path.join(build_dir, "obj/%{cfg.buildcfg}"))
