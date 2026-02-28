@@ -226,10 +226,15 @@ function m.generate(prj)
 			_p(2, 'INTERPROCEDURAL_OPTIMIZATION %s', lto)
 			_p(1, ')')
 
-			for _, command in ipairs(cfg.postbuildcommands) do
-				_p('execute_process(COMMAND %s)', command);
-			end
+			_p('endif()')
+		end
 
+		-- post-build commands
+		if cfg.postbuildcommands and #cfg.postbuildcommands > 0 then
+			_p('if(CMAKE_BUILD_TYPE STREQUAL %s)', cmake.cfgname(cfg))
+			for _, command in ipairs(cfg.postbuildcommands) do
+				_p(1, 'add_custom_command(TARGET "%s" POST_BUILD COMMAND %s)', prj.name, command)
+			end
 			_p('endif()')
 		end
 
