@@ -3,12 +3,16 @@
 #define SOKOL_GFX_IMPL
 #define SOKOL_GLUE_IMPL
 #define SOKOL_LOG_IMPL
+#define SOKOL_IMGUI_IMPL
 #define SOKOL_GLCORE
 
 #include "sokol_app.h"
 #include "sokol_gfx.h"
 #include "sokol_glue.h"
 #include "sokol_log.h"
+
+#include "imgui.h"
+#include "sokol_imgui.h"
 
 #include <math.h>
 #include <stddef.h>
@@ -32,6 +36,10 @@ static sg_pipeline g_pip;
 static sg_bindings g_bind;
 static sg_pass_action pass_action;
 static double g_time_sec = 0.0;
+static bool g_pause_rotation = false;
+static bool g_show_demo = false;
+static float g_rotation_speed = 1.0f;
+static float g_clear_color[3] = { 0.10f, 0.12f, 0.18f };
 
 static mat4 mat4_identity(void) {
     mat4 m = {};
@@ -103,6 +111,10 @@ static void init(void) {
     desc.environment = g_env;
     desc.logger.func = slog_func;
     sg_setup(&desc);
+
+    simgui_desc_t ui_desc = {};
+    ui_desc.logger.func = slog_func;
+    simgui_setup(&ui_desc);
 
     const vertex_t vertices[] = {
         {  0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f },
@@ -211,13 +223,37 @@ static void init(void) {
     pass_action = {};
     pass_action.colors[0].load_action = SG_LOADACTION_CLEAR;
     pass_action.colors[0].store_action = SG_STOREACTION_STORE;
-    pass_action.colors[0].clear_value = { 0.10f, 0.12f, 0.18f, 1.0f };
+    pass_action.colors[0].clear_value = { g_clear_color[0], g_clear_color[1], g_clear_color[2], 1.0f };
     pass_action.depth.load_action = SG_LOADACTION_CLEAR;
     pass_action.depth.clear_value = 1.0f;
 }
 
 static void frame(void) {
-    g_time_sec += sapp_frame_duration();
+    const double dt = sapp_frame_duration();
+    if (!g_pause_rotation) {
+        g_time_sec += dt * (double)g_rotation_speed;
+    }
+
+    simgui_frame_desc_t ui_frame = {};
+    ui_frame.width = sapp_width();
+    ui_frame.height = sapp_height();
+    ui_frame.delta_time = (float)dt;
+    ui_frame.dpi_scale = sapp_dpi_scale();
+    simgui_new_frame(&ui_frame);
+
+    ImGui::Begin("LiteEngine");
+    const float fps = ImGui::GetIO().Framerate;
+    const float frame_ms = (fps > 0.0f) ? (1000.0f / fps) : 0.0f;
+    ImGui::Text("Frame %.3f ms (%.1f FPS)", frame_ms, fps);
+    ImGui::Checkbox("Pause rotation", &g_pause_rotation);
+    ImGui::SliderFloat("Rotation speed", &g_rotation_speed, 0.0f, 3.0f, "%.2f");
+    ImGui::ColorEdit3("Clear color", g_clear_color);
+    ImGui::Checkbox("Show ImGui demo", &g_show_demo);
+    ImGui::End();
+    if (g_show_demo) {
+        ImGui::ShowDemoWindow(&g_show_demo);
+    }
+
     const float aspect = (float)sapp_width() / (float)sapp_height();
     const mat4 proj = mat4_perspective(60.0f * (3.14159265f / 180.0f), aspect, 0.01f, 100.0f);
     const mat4 view = mat4_translation(0.0f, 0.0f, -2.5f);
@@ -229,18 +265,25 @@ static void frame(void) {
 
     sg_pass pass = {};
     pass.action = pass_action;
+    pass.action.colors[0].clear_value = { g_clear_color[0], g_clear_color[1], g_clear_color[2], 1.0f };
     pass.swapchain = sglue_swapchain();
     sg_begin_pass(&pass);
     sg_apply_pipeline(g_pip);
     sg_apply_bindings(&g_bind);
     sg_apply_uniforms(0, SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
+    simgui_render();
     sg_end_pass();
     sg_commit();
 }
 
 static void cleanup(void) {
+    simgui_shutdown();
     sg_shutdown();
+}
+
+static void event(const sapp_event* ev) {
+    simgui_handle_event(ev);
 }
 
 sapp_desc sokol_main(int argc, char* argv[]) {
@@ -250,6 +293,7 @@ sapp_desc sokol_main(int argc, char* argv[]) {
     desc.logger.func = slog_func;
     desc.init_cb = init;
     desc.frame_cb = frame;
+    desc.event_cb = event;
     desc.cleanup_cb = cleanup;
     desc.width = 800;
     desc.height = 450;

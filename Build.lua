@@ -16,9 +16,12 @@ project "LiteEngine"
         path.join(root, "src/**.mm"),
         path.join(root, "src/**.cpp"),
         path.join(root, "src/**.h"),
+        path.join(root, "external/imgui/imgui*.cpp"),
     }
     includedirs {
         path.join(root, "external/sokol"),
+        path.join(root, "external/sokol/util"),
+        path.join(root, "external/imgui"),
     }
     targetdir (path.join(build_dir, "bin/%{cfg.buildcfg}"))
     objdir (path.join(build_dir, "obj/%{cfg.buildcfg}"))
