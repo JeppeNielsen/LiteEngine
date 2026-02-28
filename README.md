@@ -1,4 +1,4 @@
-# SokolStandalone (macOS)
+# LiteEngine (macOS)
 
 A tiny standalone macOS app using the [Sokol](https://github.com/floooh/sokol) headers, built with C++ (Objective-C++) and premake.
 
