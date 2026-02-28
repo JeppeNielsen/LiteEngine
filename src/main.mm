@@ -40,6 +40,7 @@ static bool g_pause_rotation = false;
 static bool g_show_demo = false;
 static float g_rotation_speed = 1.0f;
 static float g_clear_color[3] = { 0.10f, 0.12f, 0.18f };
+static const char* g_imgui_font_path = "LucidaG.ttf";
 
 static mat4 mat4_identity(void) {
     mat4 m = {};
@@ -114,7 +115,25 @@ static void init(void) {
 
     simgui_desc_t ui_desc = {};
     ui_desc.logger.func = slog_func;
+    ui_desc.no_default_font = true;
     simgui_setup(&ui_desc);
+    ImGui::StyleColorsLight();
+    ImGuiIO& io = ImGui::GetIO();
+    const float dpi_scale = sapp_dpi_scale();
+    const float base_font_size = 12.0f;
+    const float font_size = base_font_size * dpi_scale;
+    ImFont* font = io.Fonts->AddFontFromFileTTF(g_imgui_font_path, font_size);
+    if (!font) {
+        ImFontConfig font_cfg = {};
+        font_cfg.SizePixels = font_size;
+        font = io.Fonts->AddFontDefault(&font_cfg);
+    }
+    if (font) {
+        io.FontDefault = font;
+    }
+    if (dpi_scale > 0.0f) {
+        io.FontGlobalScale = 1.0f / dpi_scale;
+    }
 
     const vertex_t vertices[] = {
         {  0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f },
