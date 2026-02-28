@@ -23,6 +23,7 @@ project "LiteEngine"
         path.join(root, "external/sokol"),
         path.join(root, "external/sokol/util"),
         path.join(root, "external/imgui"),
+        path.join(root, "external/glm"),
     }
     targetdir (path.join(build_dir, "bin/%{cfg.buildcfg}"))
     objdir (path.join(build_dir, "obj/%{cfg.buildcfg}"))

@@ -14,7 +14,8 @@
 #include "imgui.h"
 #include "sokol_imgui.h"
 
-#include <math.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -24,11 +25,7 @@ typedef struct {
 } vertex_t;
 
 typedef struct {
-    float m[16];
-} mat4;
-
-typedef struct {
-    mat4 mvp;
+    glm::mat4 mvp;
 } vs_params_t;
 
 static sg_environment g_env;
@@ -41,70 +38,6 @@ static bool g_show_demo = false;
 static float g_rotation_speed = 1.0f;
 static float g_clear_color[3] = { 0.10f, 0.12f, 0.18f };
 static const char* g_imgui_font_path = "Assets/LucidaG.ttf";
-
-static mat4 mat4_identity(void) {
-    mat4 m = {};
-    m.m[0] = 1.0f;
-    m.m[5] = 1.0f;
-    m.m[10] = 1.0f;
-    m.m[15] = 1.0f;
-    return m;
-}
-
-static mat4 mat4_mul(const mat4& a, const mat4& b) {
-    mat4 out = {};
-    for (int c = 0; c < 4; c++) {
-        for (int r = 0; r < 4; r++) {
-            out.m[c * 4 + r] =
-                (a.m[0 * 4 + r] * b.m[c * 4 + 0]) +
-                (a.m[1 * 4 + r] * b.m[c * 4 + 1]) +
-                (a.m[2 * 4 + r] * b.m[c * 4 + 2]) +
-                (a.m[3 * 4 + r] * b.m[c * 4 + 3]);
-        }
-    }
-    return out;
-}
-
-static mat4 mat4_translation(float x, float y, float z) {
-    mat4 m = mat4_identity();
-    m.m[12] = x;
-    m.m[13] = y;
-    m.m[14] = z;
-    return m;
-}
-
-static mat4 mat4_rotation_x(float rad) {
-    mat4 m = mat4_identity();
-    const float c = cosf(rad);
-    const float s = sinf(rad);
-    m.m[5] = c;
-    m.m[6] = s;
-    m.m[9] = -s;
-    m.m[10] = c;
-    return m;
-}
-
-static mat4 mat4_rotation_y(float rad) {
-    mat4 m = mat4_identity();
-    const float c = cosf(rad);
-    const float s = sinf(rad);
-    m.m[0] = c;
-    m.m[2] = -s;
-    m.m[8] = s;
-    m.m[10] = c;
-    return m;
-}
-
-static mat4 mat4_perspective(float fov_rad, float aspect, float znear, float zfar) {
-    const float f = 1.0f / tanf(fov_rad * 0.5f);
-    mat4 m = {};
-    m.m[0] = f / aspect;
-    m.m[5] = f;
-    m.m[10] = (zfar + znear) / (znear - zfar);
-    m.m[11] = -1.0f;
-    m.m[14] = (2.0f * zfar * znear) / (znear - zfar);
-    return m;
-}
 
 static void init(void) {
     sg_desc desc = {};
@@ -274,12 +207,12 @@ static void frame(void) {
     }
 
     const float aspect = (float)sapp_width() / (float)sapp_height();
-    const mat4 proj = mat4_perspective(60.0f * (3.14159265f / 180.0f), aspect, 0.01f, 100.0f);
-    const mat4 view = mat4_translation(0.0f, 0.0f, -2.5f);
-    const mat4 rot_x = mat4_rotation_x((float)g_time_sec * 0.7f);
-    const mat4 rot_y = mat4_rotation_y((float)g_time_sec * 1.1f);
-    const mat4 model = mat4_mul(rot_y, rot_x);
-    const mat4 mvp = mat4_mul(proj, mat4_mul(view, model));
+    const glm::mat4 proj = glm::perspective(glm::radians(60.0f), aspect, 0.01f, 100.0f);
+    const glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -2.5f));
+    const glm::mat4 rot_x = glm::rotate(glm::mat4(1.0f), (float)g_time_sec * 0.7f, glm::vec3(1.0f, 0.0f, 0.0f));
+    const glm::mat4 rot_y = glm::rotate(glm::mat4(1.0f), (float)g_time_sec * 1.1f, glm::vec3(0.0f, 1.0f, 0.0f));
+    const glm::mat4 model = rot_y * rot_x;
+    const glm::mat4 mvp = proj * view * model;
     const vs_params_t vs_params = { mvp };
 
     sg_pass pass = {};
