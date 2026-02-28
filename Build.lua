@@ -2,12 +2,12 @@ require "clion"
 local root = path.getabsolute(".")
 local build_dir = path.join(root, "build")
 
-workspace "SokolStandalone"
+workspace "LiteEngine"
     location (build_dir)
     configurations { "Debug", "Release" }
-    startproject "SokolStandalone"
+    startproject "LiteEngine"
 
-project "SokolStandalone"
+project "LiteEngine"
     kind "WindowedApp"
     language "C++"
     cppdialect "C++17"
