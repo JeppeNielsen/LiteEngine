@@ -55,12 +55,18 @@ void GuiController::begin_frame(double dt) {
     simgui_new_frame(&ui_frame);
 }
 
-void GuiController::render() {
+void GuiController::render(sg_swapchain swapchain) {
     if (!initialized) {
         return;
     }
 
+    sg_pass pass = {};
+    pass.action.colors[0].load_action = SG_LOADACTION_LOAD;
+    pass.action.colors[0].store_action = SG_STOREACTION_STORE;
+    pass.swapchain = swapchain;
+    sg_begin_pass(&pass);
     simgui_render();
+    sg_end_pass();
 }
 
 void GuiController::shutdown() {

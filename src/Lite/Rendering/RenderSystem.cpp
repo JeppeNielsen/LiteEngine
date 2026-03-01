@@ -130,7 +130,6 @@ void RenderSystem::render(entt::registry& registry, float aspect) {
 
 void RenderSystem::end_frame() {
     sg_end_pass();
-    sg_commit();
 }
 
 } // namespace Lite

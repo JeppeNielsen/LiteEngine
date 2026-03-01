@@ -52,7 +52,6 @@ void ExampleApplication::on_frame(double dt) {
     const float aspect = static_cast<float>(sapp_width()) / static_cast<float>(sapp_height());
     render_system.begin_frame(sglue_swapchain(), clear_color);
     render_system.render(registry, aspect);
-    gui().render();
     render_system.end_frame();
 }
 

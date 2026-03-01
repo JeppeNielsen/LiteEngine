@@ -41,6 +41,12 @@ void ApplicationBase::frame() {
     }
 
     on_frame(dt);
+
+    if (config_cache.enable_gui && gui_initialized) {
+        gui_controller.render(sglue_swapchain());
+    }
+
+    sg_commit();
 }
 
 void ApplicationBase::cleanup() {
