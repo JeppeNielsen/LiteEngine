@@ -60,15 +60,6 @@ void ExampleApplication::on_frame(double dt) {
 }
 
 void ExampleApplication::on_gui() {
-    draw_gui();
-}
-
-void ExampleApplication::on_cleanup() {
-    render_system.shutdown();
-    sg_shutdown();
-}
-
-void ExampleApplication::draw_gui() {
     ImGui::Begin("LiteEngine");
     const float fps = ImGui::GetIO().Framerate;
     const float frame_ms = (fps > 0.0f) ? (1000.0f / fps) : 0.0f;
@@ -81,4 +72,9 @@ void ExampleApplication::draw_gui() {
     if (show_demo) {
         ImGui::ShowDemoWindow(&show_demo);
     }
+}
+
+void ExampleApplication::on_cleanup() {
+    render_system.shutdown();
+    sg_shutdown();
 }

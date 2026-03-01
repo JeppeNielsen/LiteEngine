@@ -16,7 +16,6 @@ protected:
     void on_cleanup() override;
 
 private:
-    void draw_gui();
 
     entt::registry registry{};
     RenderSystem render_system{};
