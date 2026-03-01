@@ -15,7 +15,7 @@ struct VsParams {
 }
 
 void RenderSystem::init(const sg_environment& env) {
-    env_ = env;
+    this->env = env;
 
     sg_shader_desc shd_desc = {};
     shd_desc.attrs[0].glsl_name = "position";
@@ -46,10 +46,10 @@ void RenderSystem::init(const sg_environment& env) {
     ub->glsl_uniforms[0].type = SG_UNIFORMTYPE_MAT4;
     ub->glsl_uniforms[0].array_count = 1;
 
-    shader_ = sg_make_shader(shd_desc);
+    shader = sg_make_shader(shd_desc);
 
     sg_pipeline_desc pip_desc = {};
-    pip_desc.shader = shader_;
+    pip_desc.shader = shader;
     pip_desc.layout.buffers[0].stride = static_cast<int>(sizeof(MeshVertex));
     pip_desc.layout.attrs[0].format = SG_VERTEXFORMAT_FLOAT3;
     pip_desc.layout.attrs[0].offset = static_cast<int>(offsetof(MeshVertex, x));
@@ -60,33 +60,33 @@ void RenderSystem::init(const sg_environment& env) {
     pip_desc.face_winding = SG_FACEWINDING_CCW;
     pip_desc.depth.compare = SG_COMPAREFUNC_LESS_EQUAL;
     pip_desc.depth.write_enabled = true;
-    pip_desc.depth.pixel_format = env_.defaults.depth_format;
+    pip_desc.depth.pixel_format = env.defaults.depth_format;
     pip_desc.color_count = 1;
-    pip_desc.colors[0].pixel_format = env_.defaults.color_format;
-    pip_desc.sample_count = env_.defaults.sample_count;
-    pipeline_ = sg_make_pipeline(&pip_desc);
+    pip_desc.colors[0].pixel_format = env.defaults.color_format;
+    pip_desc.sample_count = env.defaults.sample_count;
+    pipeline = sg_make_pipeline(&pip_desc);
 
-    pass_action_ = {};
-    pass_action_.colors[0].load_action = SG_LOADACTION_CLEAR;
-    pass_action_.colors[0].store_action = SG_STOREACTION_STORE;
-    pass_action_.depth.load_action = SG_LOADACTION_CLEAR;
-    pass_action_.depth.clear_value = 1.0f;
+    pass_action = {};
+    pass_action.colors[0].load_action = SG_LOADACTION_CLEAR;
+    pass_action.colors[0].store_action = SG_STOREACTION_STORE;
+    pass_action.depth.load_action = SG_LOADACTION_CLEAR;
+    pass_action.depth.clear_value = 1.0f;
 }
 
 void RenderSystem::shutdown() {
-    if (pipeline_.id) {
-        sg_destroy_pipeline(pipeline_);
-        pipeline_.id = 0;
+    if (pipeline.id) {
+        sg_destroy_pipeline(pipeline);
+        pipeline.id = 0;
     }
-    if (shader_.id) {
-        sg_destroy_shader(shader_);
-        shader_.id = 0;
+    if (shader.id) {
+        sg_destroy_shader(shader);
+        shader.id = 0;
     }
 }
 
 void RenderSystem::begin_frame(sg_swapchain swapchain, const float clear_color[3]) {
     sg_pass pass = {};
-    pass.action = pass_action_;
+    pass.action = pass_action;
     pass.action.colors[0].clear_value = { clear_color[0], clear_color[1], clear_color[2], 1.0f };
     pass.swapchain = swapchain;
     sg_begin_pass(&pass);
@@ -105,7 +105,7 @@ void RenderSystem::render(entt::registry& registry, float aspect) {
     const glm::mat4 projection = camera.projection(aspect);
     const glm::mat4 view = glm::inverse(camera_transform.matrix());
 
-    sg_apply_pipeline(pipeline_);
+    sg_apply_pipeline(pipeline);
 
     auto render_view = registry.view<const Transform, const Renderable, const Mesh>();
     for (const entt::entity entity : render_view) {

@@ -1,15 +1,22 @@
 #include "ApplicationBase.hpp"
 
+#include "sokol_glue.h"
 #include "sokol_log.h"
 
-ApplicationBase* ApplicationBase::active_app_ = nullptr;
+ApplicationBase* ApplicationBase::active_app = nullptr;
 
 AppConfig ApplicationBase::config() const {
     return AppConfig{};
 }
 
 void ApplicationBase::init() {
+    environment_cache = sglue_environment();
     on_init();
+
+    if (config_cache.enable_gui) {
+        gui_controller.init(config_cache.imgui_font_path);
+        gui_initialized = gui_controller.is_initialized();
+    }
 }
 
 void ApplicationBase::Start() {
@@ -18,14 +25,26 @@ void ApplicationBase::Start() {
 }
 
 void ApplicationBase::frame() {
-    on_frame();
+    const double dt = sapp_frame_duration();
+    if (config_cache.enable_gui && gui_initialized) {
+        gui_controller.begin_frame(dt);
+    }
+
+    on_frame(dt);
 }
 
 void ApplicationBase::cleanup() {
+    if (config_cache.enable_gui && gui_initialized) {
+        gui_controller.shutdown();
+        gui_initialized = false;
+    }
     on_cleanup();
 }
 
 void ApplicationBase::on_event(const sapp_event* ev) {
+    if (config_cache.enable_gui && gui_initialized) {
+        gui_controller.handle_event(ev);
+    }
     on_event_impl(ev);
 }
 
@@ -33,10 +52,23 @@ void ApplicationBase::on_cleanup() {}
 
 void ApplicationBase::on_event_impl(const sapp_event* /*ev*/) {}
 
+GuiController& ApplicationBase::gui() {
+    return gui_controller;
+}
+
+const GuiController& ApplicationBase::gui() const {
+    return gui_controller;
+}
+
+const sg_environment& ApplicationBase::environment() const {
+    return environment_cache;
+}
+
 sapp_desc ApplicationBase::create_desc(ApplicationBase& app) {
-    active_app_ = &app;
+    active_app = &app;
 
     const AppConfig cfg = app.config();
+    app.config_cache = cfg;
 
     sapp_desc desc = {};
     desc.logger.func = slog_func;
@@ -51,26 +83,26 @@ sapp_desc ApplicationBase::create_desc(ApplicationBase& app) {
 }
 
 void ApplicationBase::init_cb() {
-    if (active_app_) {
-        active_app_->init();
+    if (active_app) {
+        active_app->init();
     }
 }
 
 void ApplicationBase::frame_cb() {
-    if (active_app_) {
-        active_app_->frame();
+    if (active_app) {
+        active_app->frame();
     }
 }
 
 void ApplicationBase::cleanup_cb() {
-    if (active_app_) {
-        active_app_->cleanup();
-        active_app_ = nullptr;
+    if (active_app) {
+        active_app->cleanup();
+        active_app = nullptr;
     }
 }
 
 void ApplicationBase::event_cb(const sapp_event* ev) {
-    if (active_app_) {
-        active_app_->on_event(ev);
+    if (active_app) {
+        active_app->on_event(ev);
     }
 }

@@ -14,8 +14,8 @@ public:
     void end_frame();
 
 private:
-    sg_environment env_{};
-    sg_pipeline pipeline_{};
-    sg_shader shader_{};
-    sg_pass_action pass_action_{};
+    sg_environment env{};
+    sg_pipeline pipeline{};
+    sg_shader shader{};
+    sg_pass_action pass_action{};
 };
