@@ -1,9 +1,11 @@
 #pragma once
 
-#include "App/ApplicationBase.hpp"
-#include "Rendering/RenderSystem.hpp"
+#include "Lite/App/ApplicationBase.hpp"
+#include "Lite/Rendering/RenderSystem.hpp"
 
 #include <entt/entt.hpp>
+
+namespace Lite {
 
 class ExampleApplication final : public ApplicationBase {
 public:
@@ -27,3 +29,5 @@ private:
     float rotation_speed = 1.0f;
     float clear_color[3] = { 0.10f, 0.12f, 0.18f };
 };
+
+} // namespace Lite

@@ -2,6 +2,8 @@
 
 #include <glm/glm.hpp>
 
+namespace Lite {
+
 struct Transform {
     glm::vec3 position{ 0.0f };
     glm::vec3 rotation{ 0.0f };
@@ -9,3 +11,5 @@ struct Transform {
 
     glm::mat4 matrix() const;
 };
+
+} // namespace Lite

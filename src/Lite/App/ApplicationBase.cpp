@@ -1,7 +1,9 @@
-#include "App/ApplicationBase.hpp"
+#include "Lite/App/ApplicationBase.hpp"
 
 #include "sokol_glue.h"
 #include "sokol_log.h"
+
+namespace Lite {
 
 ApplicationBase* ApplicationBase::active_app = nullptr;
 
@@ -112,3 +114,5 @@ void ApplicationBase::event_cb(const sapp_event* ev) {
         active_app->on_event(ev);
     }
 }
+
+} // namespace Lite

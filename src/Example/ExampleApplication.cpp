@@ -1,17 +1,19 @@
-#include "App/ExampleApplication.hpp"
+#include "ExampleApplication.hpp"
 
-#include "Rendering/Camera.hpp"
-#include "Rendering/Mesh.hpp"
-#include "Rendering/Renderable.hpp"
-#include "Rendering/SokolGfx.hpp"
-#include "Rendering/Transform.hpp"
+#include "Lite/Rendering/Camera.hpp"
+#include "Lite/Rendering/Mesh.hpp"
+#include "Lite/Rendering/Renderable.hpp"
+#include "Lite/Rendering/SokolGfx.hpp"
+#include "Lite/Rendering/Transform.hpp"
 
-#include "Platform/Sokol/SokolApp.hpp"
+#include "Lite/Platform/Sokol/SokolApp.hpp"
 #include "imgui.h"
 #include "sokol_glue.h"
 #include "sokol_log.h"
 
 #include <glm/glm.hpp>
+
+namespace Lite {
 
 AppConfig ExampleApplication::config() const {
     AppConfig cfg = ApplicationBase::config();
@@ -78,3 +80,5 @@ void ExampleApplication::on_cleanup() {
     render_system.shutdown();
     sg_shutdown();
 }
+
+} // namespace Lite

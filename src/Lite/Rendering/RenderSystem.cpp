@@ -8,6 +8,8 @@
 #include <glm/glm.hpp>
 #include <cstddef>
 
+namespace Lite {
+
 namespace {
 struct VsParams {
     glm::mat4 mvp;
@@ -130,3 +132,5 @@ void RenderSystem::end_frame() {
     sg_end_pass();
     sg_commit();
 }
+
+} // namespace Lite

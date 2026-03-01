@@ -1,6 +1,8 @@
 #pragma once
 
-#include "Platform/Sokol/SokolApp.hpp"
+#include "Lite/Platform/Sokol/SokolApp.hpp"
+
+namespace Lite {
 
 class GuiController {
 public:
@@ -15,3 +17,5 @@ public:
 private:
     bool initialized = false;
 };
+
+} // namespace Lite

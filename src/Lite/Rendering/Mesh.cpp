@@ -2,6 +2,8 @@
 
 #include <cstdint>
 
+namespace Lite {
+
 Mesh CreateCubeMesh() {
     const MeshVertex vertices[] = {
         {  0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f },
@@ -63,3 +65,5 @@ Mesh CreateCubeMesh() {
 
     return mesh;
 }
+
+} // namespace Lite

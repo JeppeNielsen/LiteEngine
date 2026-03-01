@@ -1,10 +1,12 @@
-#include "Gui/GuiController.hpp"
+#include "Lite/Gui/GuiController.hpp"
 
-#include "Rendering/SokolGfx.hpp"
+#include "Lite/Rendering/SokolGfx.hpp"
 
 #include "imgui.h"
 #include "sokol_imgui.h"
 #include "sokol_log.h"
+
+namespace Lite {
 
 void GuiController::init(const char* font_path) {
     if (initialized) {
@@ -77,3 +79,5 @@ void GuiController::handle_event(const sapp_event* ev) {
 
     simgui_handle_event(ev);
 }
+
+} // namespace Lite

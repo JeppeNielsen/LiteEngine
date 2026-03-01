@@ -1,5 +1,0 @@
-#pragma once
-
-#include "Platform/Sokol/SokolConfig.hpp"
-
-#include "sokol_gfx.h"

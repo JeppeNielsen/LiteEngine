@@ -4,6 +4,8 @@
 
 #include <entt/entt.hpp>
 
+namespace Lite {
+
 class RenderSystem {
 public:
     void init(const sg_environment& env);
@@ -19,3 +21,5 @@ private:
     sg_shader shader{};
     sg_pass_action pass_action{};
 };
+
+} // namespace Lite

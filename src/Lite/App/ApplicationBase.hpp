@@ -1,7 +1,9 @@
 #pragma once
 
-#include "Gui/GuiController.hpp"
-#include "Rendering/SokolGfx.hpp"
+#include "Lite/Gui/GuiController.hpp"
+#include "Lite/Rendering/SokolGfx.hpp"
+
+namespace Lite {
 
 struct AppConfig {
     int width = 800;
@@ -47,3 +49,5 @@ private:
     GuiController gui_controller{};
     sg_environment environment_cache{};
 };
+
+} // namespace Lite

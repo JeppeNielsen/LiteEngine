@@ -2,6 +2,8 @@
 
 #include "SokolGfx.hpp"
 
+namespace Lite {
+
 struct MeshVertex {
     float x, y, z;
     float r, g, b, a;
@@ -13,3 +15,5 @@ struct Mesh {
 };
 
 Mesh CreateCubeMesh();
+
+} // namespace Lite

@@ -2,6 +2,8 @@
 
 #include <glm/glm.hpp>
 
+namespace Lite {
+
 struct Camera {
     float fov_degrees = 60.0f;
     float near_plane = 0.01f;
@@ -9,3 +11,5 @@ struct Camera {
 
     glm::mat4 projection(float aspect) const;
 };
+
+} // namespace Lite

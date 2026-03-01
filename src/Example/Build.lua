@@ -1,11 +1,11 @@
 require "clion"
-local root = path.getabsolute(".")
-local build_dir = path.join(root, "build")
+local root = path.getabsolute(path.join(_SCRIPT_DIR, "..", ".."))
+local build_dir = path.join(root, "build/example")
 local assets_dir = path.join(root, "src/Example/Assets")
 
 dofile(path.join(root, "premake", "LiteEngine.lua"))
 
-workspace "LiteEngine"
+workspace "ExampleApplication"
     location (build_dir)
     configurations { "Debug", "Release" }
     startproject "ExampleApplication"
