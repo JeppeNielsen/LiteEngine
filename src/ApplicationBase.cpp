@@ -12,6 +12,11 @@ void ApplicationBase::init() {
     on_init();
 }
 
+void ApplicationBase::Start() {
+    sapp_desc desc = create_desc(*this);
+    sapp_run(&desc);
+}
+
 void ApplicationBase::frame() {
     on_frame();
 }

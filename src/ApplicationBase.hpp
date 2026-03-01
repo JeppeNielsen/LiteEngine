@@ -14,12 +14,11 @@ public:
 
     virtual AppConfig config() const;
 
+    void Start();
     void init();
     void frame();
     void cleanup();
     void on_event(const sapp_event* ev);
-
-    static sapp_desc create_desc(ApplicationBase& app);
 
 protected:
     virtual void on_init() = 0;
@@ -28,6 +27,7 @@ protected:
     virtual void on_event_impl(const sapp_event* ev);
 
 private:
+    static sapp_desc create_desc(ApplicationBase& app);
     static void init_cb();
     static void frame_cb();
     static void cleanup_cb();
