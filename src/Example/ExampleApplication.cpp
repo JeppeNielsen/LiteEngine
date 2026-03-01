@@ -22,11 +22,6 @@ AppConfig ExampleApplication::config() const {
 }
 
 void ExampleApplication::on_init() {
-    sg_desc desc = {};
-    desc.environment = environment();
-    desc.logger.func = slog_func;
-    sg_setup(&desc);
-
     render_system.init(environment());
 
     camera_entity = registry.create();

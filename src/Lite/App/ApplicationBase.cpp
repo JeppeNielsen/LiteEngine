@@ -13,6 +13,10 @@ AppConfig ApplicationBase::config() const {
 
 void ApplicationBase::init() {
     environment_cache = sglue_environment();
+    sg_desc desc = {};
+    desc.environment = environment_cache;
+    desc.logger.func = slog_func;
+    sg_setup(&desc);
     on_init();
 
     if (config_cache.enable_gui) {
