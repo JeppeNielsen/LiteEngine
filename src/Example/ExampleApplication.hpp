@@ -21,6 +21,8 @@ private:
 
     entt::registry registry{};
     RenderSystem render_system{};
+    int viewport_width = 0;
+    int viewport_height = 0;
     entt::entity camera_entity = entt::null;
     entt::entity cube_entity = entt::null;
     double time_sec = 0.0;

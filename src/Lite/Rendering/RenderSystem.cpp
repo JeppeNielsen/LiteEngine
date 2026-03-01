@@ -76,6 +76,7 @@ void RenderSystem::init(const sg_environment& env) {
 }
 
 void RenderSystem::shutdown() {
+    destroy_render_target();
     if (pipeline.id) {
         sg_destroy_pipeline(pipeline);
         pipeline.id = 0;
@@ -91,6 +92,22 @@ void RenderSystem::begin_frame(sg_swapchain swapchain, const float clear_color[3
     pass.action = pass_action;
     pass.action.colors[0].clear_value = { clear_color[0], clear_color[1], clear_color[2], 1.0f };
     pass.swapchain = swapchain;
+    sg_begin_pass(&pass);
+}
+
+void RenderSystem::begin_offscreen_frame(const float clear_color[3]) {
+    if (!target_color_attachment.id || !target_depth_attachment.id) {
+        return;
+    }
+
+    sg_pass pass = {};
+    pass.action = pass_action;
+    pass.action.colors[0].clear_value = { clear_color[0], clear_color[1], clear_color[2], 1.0f };
+    pass.attachments.colors[0] = target_color_attachment;
+    pass.attachments.depth_stencil = target_depth_attachment;
+    if (target_resolve_attachment.id) {
+        pass.attachments.resolves[0] = target_resolve_attachment;
+    }
     sg_begin_pass(&pass);
 }
 
@@ -130,6 +147,125 @@ void RenderSystem::render(entt::registry& registry, float aspect) {
 
 void RenderSystem::end_frame() {
     sg_end_pass();
+}
+
+void RenderSystem::ensure_render_target(int width, int height) {
+    if (width <= 0 || height <= 0) {
+        return;
+    }
+    if (width == target_width && height == target_height) {
+        return;
+    }
+
+    destroy_render_target();
+    target_width = width;
+    target_height = height;
+
+    sg_image_desc color_desc = {};
+    color_desc.width = width;
+    color_desc.height = height;
+    color_desc.pixel_format = env.defaults.color_format;
+    color_desc.sample_count = env.defaults.sample_count;
+    color_desc.usage.color_attachment = true;
+    color_desc.label = "lite-render-target-color";
+    target_color = sg_make_image(&color_desc);
+
+    sg_image_desc depth_desc = {};
+    depth_desc.width = width;
+    depth_desc.height = height;
+    depth_desc.pixel_format = env.defaults.depth_format;
+    depth_desc.sample_count = env.defaults.sample_count;
+    depth_desc.usage.depth_stencil_attachment = true;
+    depth_desc.label = "lite-render-target-depth";
+    target_depth = sg_make_image(&depth_desc);
+
+    if (env.defaults.sample_count > 1) {
+        sg_image_desc resolve_desc = {};
+        resolve_desc.width = width;
+        resolve_desc.height = height;
+        resolve_desc.pixel_format = env.defaults.color_format;
+        resolve_desc.sample_count = 1;
+        resolve_desc.usage.resolve_attachment = true;
+        resolve_desc.label = "lite-render-target-resolve";
+        target_resolve = sg_make_image(&resolve_desc);
+    }
+
+    sg_view_desc color_view_desc = {};
+    color_view_desc.color_attachment.image = target_color;
+    color_view_desc.color_attachment.mip_level = 0;
+    color_view_desc.color_attachment.slice = 0;
+    color_view_desc.label = "lite-render-target-color-attachment";
+    target_color_attachment = sg_make_view(&color_view_desc);
+
+    sg_view_desc depth_view_desc = {};
+    depth_view_desc.depth_stencil_attachment.image = target_depth;
+    depth_view_desc.depth_stencil_attachment.mip_level = 0;
+    depth_view_desc.depth_stencil_attachment.slice = 0;
+    depth_view_desc.label = "lite-render-target-depth-attachment";
+    target_depth_attachment = sg_make_view(&depth_view_desc);
+    if (target_resolve.id) {
+        sg_view_desc resolve_view_desc = {};
+        resolve_view_desc.resolve_attachment.image = target_resolve;
+        resolve_view_desc.resolve_attachment.mip_level = 0;
+        resolve_view_desc.resolve_attachment.slice = 0;
+        resolve_view_desc.label = "lite-render-target-resolve-attachment";
+        target_resolve_attachment = sg_make_view(&resolve_view_desc);
+
+        sg_view_desc texture_view_desc = {};
+        texture_view_desc.texture.image = target_resolve;
+        texture_view_desc.texture.mip_levels.base = 0;
+        texture_view_desc.texture.mip_levels.count = 1;
+        texture_view_desc.texture.slices.base = 0;
+        texture_view_desc.texture.slices.count = 1;
+        texture_view_desc.label = "lite-render-target-texture";
+        target_texture_view = sg_make_view(&texture_view_desc);
+    } else {
+        sg_view_desc texture_view_desc = {};
+        texture_view_desc.texture.image = target_color;
+        texture_view_desc.texture.mip_levels.base = 0;
+        texture_view_desc.texture.mip_levels.count = 1;
+        texture_view_desc.texture.slices.base = 0;
+        texture_view_desc.texture.slices.count = 1;
+        texture_view_desc.label = "lite-render-target-texture";
+        target_texture_view = sg_make_view(&texture_view_desc);
+    }
+}
+
+sg_view RenderSystem::render_target_view() const {
+    return target_texture_view;
+}
+
+void RenderSystem::destroy_render_target() {
+    if (target_color_attachment.id) {
+        sg_destroy_view(target_color_attachment);
+        target_color_attachment.id = 0;
+    }
+    if (target_depth_attachment.id) {
+        sg_destroy_view(target_depth_attachment);
+        target_depth_attachment.id = 0;
+    }
+    if (target_resolve_attachment.id) {
+        sg_destroy_view(target_resolve_attachment);
+        target_resolve_attachment.id = 0;
+    }
+    if (target_texture_view.id) {
+        sg_destroy_view(target_texture_view);
+        target_texture_view.id = 0;
+    }
+    if (target_color.id) {
+        sg_destroy_image(target_color);
+        target_color.id = 0;
+    }
+    if (target_depth.id) {
+        sg_destroy_image(target_depth);
+        target_depth.id = 0;
+    }
+    if (target_resolve.id) {
+        sg_destroy_image(target_resolve);
+        target_resolve.id = 0;
+    }
+    target_width = 0;
+    target_height = 0;
 }
 
 } // namespace Lite

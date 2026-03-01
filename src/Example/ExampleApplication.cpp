@@ -9,6 +9,7 @@
 #include "Lite/Platform/Sokol/SokolApp.hpp"
 #include "imgui.h"
 #include "sokol_glue.h"
+#include "sokol_imgui.h"
 #include "sokol_log.h"
 
 #include <glm/glm.hpp>
@@ -49,10 +50,13 @@ void ExampleApplication::on_frame(double dt) {
             0.0f);
     }
 
-    const float aspect = static_cast<float>(sapp_width()) / static_cast<float>(sapp_height());
-    render_system.begin_frame(sglue_swapchain(), clear_color);
-    render_system.render(registry, aspect);
-    render_system.end_frame();
+    const sg_view target_view = render_system.render_target_view();
+    if (viewport_width > 0 && viewport_height > 0 && target_view.id) {
+        const float aspect = static_cast<float>(viewport_width) / static_cast<float>(viewport_height);
+        render_system.begin_offscreen_frame(clear_color);
+        render_system.render(registry, aspect);
+        render_system.end_frame();
+    }
 }
 
 void ExampleApplication::on_gui() {
@@ -68,6 +72,25 @@ void ExampleApplication::on_gui() {
     if (show_demo) {
         ImGui::ShowDemoWindow(&show_demo);
     }
+
+    ImGui::Begin("Viewport");
+    const ImVec2 avail = ImGui::GetContentRegionAvail();
+    const int target_w = static_cast<int>(avail.x);
+    const int target_h = static_cast<int>(avail.y);
+    if (target_w > 0 && target_h > 0) {
+        viewport_width = target_w;
+        viewport_height = target_h;
+        render_system.ensure_render_target(target_w, target_h);
+        const sg_view view = render_system.render_target_view();
+        if (view.id) {
+            ImGui::Image(simgui_imtextureid(view), avail, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
+        } else {
+            ImGui::TextUnformatted("Waiting for render target...");
+        }
+    } else {
+        ImGui::TextUnformatted("Viewport too small.");
+    }
+    ImGui::End();
 }
 
 void ExampleApplication::on_cleanup() {
