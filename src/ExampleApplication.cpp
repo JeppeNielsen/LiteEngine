@@ -44,19 +44,6 @@ void ExampleApplication::on_frame(double dt) {
         time_sec += dt * static_cast<double>(rotation_speed);
     }
 
-    ImGui::Begin("LiteEngine");
-    const float fps = ImGui::GetIO().Framerate;
-    const float frame_ms = (fps > 0.0f) ? (1000.0f / fps) : 0.0f;
-    ImGui::Text("Frame %.3f ms (%.1f FPS)", frame_ms, fps);
-    ImGui::Checkbox("Pause rotation", &pause_rotation);
-    ImGui::SliderFloat("Rotation speed", &rotation_speed, 0.0f, 3.0f, "%.2f");
-    ImGui::ColorEdit3("Clear color", clear_color);
-    ImGui::Checkbox("Show ImGui demo", &show_demo);
-    ImGui::End();
-    if (show_demo) {
-        ImGui::ShowDemoWindow(&show_demo);
-    }
-
     if (registry.valid(cube_entity)) {
         Transform& cube_transform = registry.get<Transform>(cube_entity);
         cube_transform.rotation = glm::vec3(
@@ -72,7 +59,26 @@ void ExampleApplication::on_frame(double dt) {
     render_system.end_frame();
 }
 
+void ExampleApplication::on_gui() {
+    draw_gui();
+}
+
 void ExampleApplication::on_cleanup() {
     render_system.shutdown();
     sg_shutdown();
+}
+
+void ExampleApplication::draw_gui() {
+    ImGui::Begin("LiteEngine");
+    const float fps = ImGui::GetIO().Framerate;
+    const float frame_ms = (fps > 0.0f) ? (1000.0f / fps) : 0.0f;
+    ImGui::Text("Frame %.3f ms (%.1f FPS)", frame_ms, fps);
+    ImGui::Checkbox("Pause rotation", &pause_rotation);
+    ImGui::SliderFloat("Rotation speed", &rotation_speed, 0.0f, 3.0f, "%.2f");
+    ImGui::ColorEdit3("Clear color", clear_color);
+    ImGui::Checkbox("Show ImGui demo", &show_demo);
+    ImGui::End();
+    if (show_demo) {
+        ImGui::ShowDemoWindow(&show_demo);
+    }
 }

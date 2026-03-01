@@ -26,6 +26,7 @@ public:
 protected:
     virtual void on_init() = 0;
     virtual void on_frame(double dt) = 0;
+    virtual void on_gui();
     virtual void on_cleanup();
     virtual void on_event_impl(const sapp_event* ev);
 

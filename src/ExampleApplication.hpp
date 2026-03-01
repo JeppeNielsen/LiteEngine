@@ -12,9 +12,12 @@ public:
 protected:
     void on_init() override;
     void on_frame(double dt) override;
+    void on_gui() override;
     void on_cleanup() override;
 
 private:
+    void draw_gui();
+
     entt::registry registry{};
     RenderSystem render_system{};
     entt::entity camera_entity = entt::null;

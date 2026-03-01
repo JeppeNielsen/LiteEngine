@@ -30,6 +30,10 @@ void ApplicationBase::frame() {
         gui_controller.begin_frame(dt);
     }
 
+    if (config_cache.enable_gui && gui_initialized) {
+        on_gui();
+    }
+
     on_frame(dt);
 }
 
@@ -49,6 +53,8 @@ void ApplicationBase::on_event(const sapp_event* ev) {
 }
 
 void ApplicationBase::on_cleanup() {}
+
+void ApplicationBase::on_gui() {}
 
 void ApplicationBase::on_event_impl(const sapp_event* /*ev*/) {}
 
