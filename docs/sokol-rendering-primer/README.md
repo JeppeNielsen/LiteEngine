@@ -1,6 +1,6 @@
 # Sokol Rendering Primitives and Resources
 
-This document explains the core rendering concepts in Sokol's `sokol_gfx.h` and how they relate to textures, render textures, shaders, and draw calls. It is written to match the API used in this repo (see `src/main.mm`).
+This document explains the core rendering concepts in Sokol's `sokol_gfx.h` and how they relate to textures, render textures, shaders, and draw calls. It is written to match the API used in this repo (see `src/Example/main.cpp`).
 
 ## Quick mental model
 
@@ -43,7 +43,7 @@ Buffer usage (`sg_buffer_usage`):
 
 Common paths:
 
-- Immutable vertex/index buffers with initial data (see `src/main.mm`).
+- Immutable vertex/index buffers with initial data (see `src/Example/main.cpp`).
 - Dynamic or stream buffers updated with `sg_update_buffer` or `sg_append_buffer`.
 
 ## Images and textures
@@ -128,7 +128,7 @@ Key points:
 
 - Sokol does not provide a single shader language; you supply backend-specific sources or bytecode.
 - Uniforms are organized into **uniform blocks** and updated with `sg_apply_uniforms(slot, data)`.
-- In this repo, the shader is inline GLSL (see `src/main.mm`).
+- In this repo, the shader is inline GLSL (see `src/Example/main.cpp`).
 
 If you need cross-compilation, Sokol provides a separate toolchain (`sokol-shdc`) to generate backend-specific shader code.
 
@@ -158,7 +158,7 @@ A render pass includes a `sg_pass_action` that defines load/store behavior and c
 
 ## Example in this repo
 
-`src/main.mm` demonstrates:
+`src/Example/main.cpp` demonstrates:
 
 - Creating vertex and index buffers.
 - Creating a simple GLSL shader.

@@ -59,6 +59,6 @@ open build/bin/Debug/SokolStandalone.app
 ```
 
 ## Notes
-- The entry point is `src/main.mm` (Objective-C++). This is required because Sokol's macOS backend uses Cocoa APIs.
+- The entry point is `src/Example/main.cpp`.
 - The sample uses the OpenGL backend (`SOKOL_GLCORE`) for compatibility with older macOS SDKs.
-- ImGui rendering and input is wired through `sokol_imgui.h` (see `src/main.mm`).
+- ImGui rendering and input is wired through `sokol_imgui.h` (see `src/Example/main.cpp`).
