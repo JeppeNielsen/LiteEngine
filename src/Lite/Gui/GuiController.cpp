@@ -20,6 +20,7 @@ void GuiController::init(const char* font_path) {
 
     ImGui::StyleColorsLight();
     ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     const float dpi_scale = sapp_dpi_scale();
     const float base_font_size = 12.0f;
     const float font_size = base_font_size * dpi_scale;

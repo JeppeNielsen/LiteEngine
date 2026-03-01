@@ -1,5 +1,6 @@
 #include "Lite/App/ApplicationBase.hpp"
 
+#include "imgui.h"
 #include "sokol_glue.h"
 #include "sokol_log.h"
 
@@ -37,6 +38,7 @@ void ApplicationBase::frame() {
     }
 
     if (config_cache.enable_gui && gui_initialized) {
+        ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
         on_gui();
     }
 
