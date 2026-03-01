@@ -5,7 +5,7 @@
 #define SOKOL_LOG_IMPL
 #define SOKOL_IMGUI_IMPL
 
-#include "SokolApp.hpp"
+#include "Platform/Sokol/SokolApp.hpp"
 #include "Rendering/SokolGfx.hpp"
 #include "sokol_glue.h"
 #include "sokol_log.h"

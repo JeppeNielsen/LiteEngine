@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ApplicationBase.hpp"
+#include "App/ApplicationBase.hpp"
 #include "Rendering/RenderSystem.hpp"
 
 #include <entt/entt.hpp>

@@ -2,4 +2,4 @@
 
 #include "Platform/Sokol/SokolConfig.hpp"
 
-#include "sokol_gfx.h"
+#include "sokol_app.h"

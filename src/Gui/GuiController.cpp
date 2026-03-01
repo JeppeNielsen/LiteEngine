@@ -1,4 +1,4 @@
-#include "GuiController.hpp"
+#include "Gui/GuiController.hpp"
 
 #include "Rendering/SokolGfx.hpp"
 

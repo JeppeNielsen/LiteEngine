@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SokolApp.hpp"
+#include "Platform/Sokol/SokolApp.hpp"
 
 class GuiController {
 public:

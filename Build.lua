@@ -20,6 +20,7 @@ project "LiteEngine"
         path.join(root, "external/imgui/imgui*.cpp"),
     }
     includedirs {
+        path.join(root, "src"),
         path.join(root, "external/sokol"),
         path.join(root, "external/sokol/util"),
         path.join(root, "external/imgui"),

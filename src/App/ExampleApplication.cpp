@@ -1,4 +1,4 @@
-#include "ExampleApplication.hpp"
+#include "App/ExampleApplication.hpp"
 
 #include "Rendering/Camera.hpp"
 #include "Rendering/Mesh.hpp"
@@ -6,7 +6,7 @@
 #include "Rendering/SokolGfx.hpp"
 #include "Rendering/Transform.hpp"
 
-#include "SokolApp.hpp"
+#include "Platform/Sokol/SokolApp.hpp"
 #include "imgui.h"
 #include "sokol_glue.h"
 #include "sokol_log.h"
