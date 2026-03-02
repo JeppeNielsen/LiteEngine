@@ -1,7 +1,18 @@
 require "clion"
+newoption {
+    trigger = "emscripten",
+    description = "Build with Emscripten (WebGL2)",
+}
 local root = path.getabsolute(path.join(_SCRIPT_DIR, "..", ".."))
+if not os.isfile(path.join(root, "premake", "LiteEngine.lua")) then
+    root = path.getabsolute(os.getcwd())
+end
 local build_dir = path.join(root, "build/example")
+if _OPTIONS["emscripten"] then
+    build_dir = path.join(root, "build", "example-emscripten")
+end
 local assets_dir = path.join(root, "src/Example/Assets")
+local emscripten_shell = path.join(root, "src/Example/emscripten_shell.html")
 
 dofile(path.join(root, "premake", "LiteEngine.lua"))
 
@@ -22,6 +33,7 @@ project "ExampleApplication"
         path.join(root, "src/Example/**.cpp"),
         path.join(root, "src/Example/**.h"),
         path.join(root, "src/Example/**.hpp"),
+        emscripten_shell,
     }
     includedirs {
         path.join(root, "src/Example"),
@@ -52,6 +64,34 @@ project "ExampleApplication"
         linkoptions {
             "-framework Cocoa",
             "-framework OpenGL",
+        }
+    filter "options:emscripten"
+        targetextension ".html"
+        removelinkoptions {
+            "-framework Cocoa",
+            "-framework OpenGL",
+        }
+        linkoptions {
+            "-s USE_WEBGL2=1",
+            "-s FULL_ES3=1",
+            "-s MIN_WEBGL_VERSION=2",
+            "-s MAX_WEBGL_VERSION=2",
+            "-s ALLOW_MEMORY_GROWTH=1",
+            "-s STACK_SIZE=2097152",
+            "--preload-file " .. assets_dir .. "@/Assets",
+            "--shell-file " .. emscripten_shell,
+        }
+    filter { "options:emscripten", "configurations:Debug" }
+        buildoptions {
+            "-g",
+        }
+        linkoptions {
+            "-g",
+            "-gsource-map",
+            "--profiling-funcs",
+            "-s ASSERTIONS=2",
+            "-s SAFE_HEAP=1",
+            "-s STACK_OVERFLOW_CHECK=2",
         }
     filter "configurations:Debug"
         symbols "On"

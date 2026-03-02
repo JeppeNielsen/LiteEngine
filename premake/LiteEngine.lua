@@ -11,6 +11,19 @@ function liteengine_project(root, build_dir)
             path.join(root, "src/Lite/**.hpp"),
             path.join(root, "external/imgui/imgui*.cpp"),
         }
+        filter { "system:macosx", "not options:emscripten" }
+            removefiles {
+                path.join(root, "src/Lite/Platform/Sokol/SokolImpl.cpp"),
+            }
+        filter "options:emscripten"
+            removefiles {
+                path.join(root, "src/Lite/**.mm"),
+            }
+        filter "system:not macosx"
+            removefiles {
+                path.join(root, "src/Lite/**.mm"),
+            }
+        filter {}
         includedirs {
             path.join(root, "src"),
             path.join(root, "external/sokol"),

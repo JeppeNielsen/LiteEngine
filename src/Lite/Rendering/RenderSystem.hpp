@@ -12,7 +12,7 @@ public:
     void shutdown();
 
     void begin_frame(sg_swapchain swapchain, const float clear_color[3]);
-    void begin_offscreen_frame(const float clear_color[3]);
+    bool begin_offscreen_frame(const float clear_color[3]);
     void render(entt::registry& registry, float aspect);
     void end_frame();
     void ensure_render_target(int width, int height);

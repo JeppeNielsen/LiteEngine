@@ -53,9 +53,10 @@ void ExampleApplication::on_frame(double dt) {
     const sg_view target_view = render_system.render_target_view();
     if (viewport_width > 0 && viewport_height > 0 && target_view.id) {
         const float aspect = static_cast<float>(viewport_width) / static_cast<float>(viewport_height);
-        render_system.begin_offscreen_frame(clear_color);
-        render_system.render(registry, aspect);
-        render_system.end_frame();
+        if (render_system.begin_offscreen_frame(clear_color)) {
+            render_system.render(registry, aspect);
+            render_system.end_frame();
+        }
     }
 }
 

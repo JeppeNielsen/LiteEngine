@@ -10,3 +10,6 @@
 [submodule "external/entt"]
 	path = external/entt
 	url = https://github.com/skypjack/entt.git
+[submodule "external/emsdk"]
+	path = external/emsdk
+	url = https://github.com/emscripten-core/emsdk.git
