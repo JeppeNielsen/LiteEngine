@@ -28,6 +28,10 @@ void ApplicationBase::init() {
 
 void ApplicationBase::Start() {
     sapp_desc desc = create_desc(*this);
+#if defined(__EMSCRIPTEN__)
+    desc.html5.use_emsc_set_main_loop = true;
+    desc.html5.emsc_set_main_loop_simulate_infinite_loop = true;
+#endif
     sapp_run(&desc);
 }
 
